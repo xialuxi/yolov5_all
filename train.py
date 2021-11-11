@@ -275,7 +275,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                 f'Starting training for {epochs} epochs...')
 
     no_aug_epochs = hyp.get('no_aug_epochs', 0)
-    if cuda and RANK != -1:
+    if type(model) in (nn.parallel.DataParallel, nn.parallel.DistributedDataParallel)::
         detect = model.module.model[-1]
     else:
         detect = model.model[-1]
