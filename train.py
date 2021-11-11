@@ -44,7 +44,7 @@ from utils.downloads import attempt_download
 from utils.loss import ComputeLoss
 from utils.plots import plot_labels, plot_evolve
 from utils.torch_utils import EarlyStopping, ModelEMA, de_parallel, intersect_dicts, select_device, \
-    torch_distributed_zero_first
+    torch_distributed_zero_first, is_parallel
 from utils.loggers.wandb.wandb_utils import check_wandb_resume
 from utils.metrics import fitness
 from utils.loggers import Loggers
@@ -275,7 +275,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                 f'Starting training for {epochs} epochs...')
 
     no_aug_epochs = hyp.get('no_aug_epochs', 0)
-    if type(model) in (nn.parallel.DataParallel, nn.parallel.DistributedDataParallel)::
+    if if is_parallel(model):
         detect = model.module.model[-1]
     else:
         detect = model.model[-1]
