@@ -827,3 +827,38 @@ class MobileNetV3_Block(nn.Module):
             if isinstance(m, (Conv, DWConv, RepVGGBlock)):
                 m.fuse()
 
+                
+                
+class MobileNetV2_Block(nn.Module):
+    def __init__(self, inp, oup, stride=1, expand_ratio=1):
+        super(MobileNetV2_Block, self).__init__()
+        assert stride in [1, 2]
+        self.stride = stride
+        self.identity = stride == 1 and inp == oup
+        hidden_dim = int(round(inp * expand_ratio))
+        act = 'ReLU'
+
+        if expand_ratio != 1:
+            self.conv = nn.Sequential(
+                Conv(inp, hidden_dim, k=1, s=1, p=0, act=act),
+                DWConv(hidden_dim, hidden_dim, k=3, s=stride, act=act),
+                Conv(hidden_dim, oup, k=1, s=1, p=0, act=False),
+            )
+        else:
+            self.conv = nn.Sequential(
+                DWConv(hidden_dim, hidden_dim, k=3, s=stride, act=act),
+                Conv(hidden_dim, oup, k=1, s=1, p=0, act=False),
+            )
+
+    def forward(self, x):
+        y = self.conv(x)
+        if self.identity:
+            return x + y
+        else:
+            return y
+
+    def fuse(self):
+        for m in self.conv:
+            if isinstance(m, (Conv, DWConv, RepVGGBlock)):
+                m.fuse()
+ 
